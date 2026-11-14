@@ -5,6 +5,8 @@
   "description": "List, start, stop and read logs of local docker containers from electerm",
   "main": "main.js",
   "license": "MIT",
+  "author": "ZHAO Xudong",
+  "homepage": "https://github.com/electerm/electerm-widget-docker-cockpit",
   "electerm": {
     "id": "docker-cockpit",
     "name": "Docker Cockpit",
