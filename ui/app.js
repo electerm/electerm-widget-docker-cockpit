@@ -2,6 +2,7 @@
 /* global electerm */
 
 const $ = id => document.getElementById(id)
+const t = window.widgetI18n.t
 
 const state = {
   containers: [],
@@ -60,8 +61,8 @@ function render () {
     const empty = document.createElement('p')
     empty.className = 'empty'
     empty.textContent = state.containers.length
-      ? 'No container matches the filter.'
-      : 'No container. Start one and press refresh.'
+      ? t('noMatch')
+      : t('noContainer')
     list.appendChild(empty)
     return
   }
@@ -109,18 +110,18 @@ function render () {
     const isPaused = row.state === 'paused'
 
     if (isPaused) {
-      actions.appendChild(button('stop', () => runAction(row, 'stop', true), 'danger'))
-      actions.appendChild(button('resume', () => runAction(row, 'unpause')))
-      actions.appendChild(button('restart', () => runAction(row, 'restart', true)))
+      actions.appendChild(button(t('stop'), () => runAction(row, 'stop', true), 'danger'))
+      actions.appendChild(button(t('resume'), () => runAction(row, 'unpause')))
+      actions.appendChild(button(t('restart'), () => runAction(row, 'restart', true)))
     } else if (isRunning) {
-      actions.appendChild(button('stop', () => runAction(row, 'stop', true), 'danger'))
-      actions.appendChild(button('pause', () => runAction(row, 'pause')))
-      actions.appendChild(button('restart', () => runAction(row, 'restart', true)))
+      actions.appendChild(button(t('stop'), () => runAction(row, 'stop', true), 'danger'))
+      actions.appendChild(button(t('pause'), () => runAction(row, 'pause')))
+      actions.appendChild(button(t('restart'), () => runAction(row, 'restart', true)))
     } else {
-      actions.appendChild(button('start', () => runAction(row, 'start'), 'primary'))
+      actions.appendChild(button(t('start'), () => runAction(row, 'start'), 'primary'))
     }
-    actions.appendChild(button('logs', () => openLogs(row)))
-    actions.appendChild(button('exec', () => copyExec(row)))
+    actions.appendChild(button(t('logs'), () => openLogs(row)))
+    actions.appendChild(button(t('exec'), () => copyExec(row)))
 
     el.appendChild(actions)
     el.addEventListener('click', () => openLogs(row))
@@ -131,17 +132,17 @@ function render () {
 function renderMeta (data) {
   const parts = []
   if (data.total != null) {
-    parts.push(`${data.running} running / ${data.total}`)
+    parts.push(`${data.running} ${t('running')} / ${data.total}`)
   }
   if (data.serverVersion) {
-    parts.push('engine ' + data.serverVersion)
+    parts.push(t('engine') + ' ' + data.serverVersion)
   }
   $('meta').textContent = parts.join(' · ')
 }
 
 async function refresh ({ quiet } = {}) {
   if (!quiet) {
-    setStatus('loading…')
+    setStatus(t('loading'))
   }
   try {
     const data = await electerm.call('list')
@@ -150,7 +151,7 @@ async function refresh ({ quiet } = {}) {
     setBanner('')
     render()
     if (!quiet) {
-      setStatus('updated ' + new Date().toLocaleTimeString(), 'ok')
+      setStatus(t('updated') + new Date().toLocaleTimeString(), 'ok')
     }
   } catch (error) {
     setBanner(error.message)
@@ -173,20 +174,21 @@ function setBusy (id, busy) {
 }
 
 async function runAction (row, action, needsConfirm) {
-  if (needsConfirm && !window.confirm(`${action} ${row.name}?`)) {
+  const label = t(action)
+  if (needsConfirm && !window.confirm(`${label} ${row.name}${t('confirm')}`)) {
     return
   }
   setBusy(row.id, true)
-  setStatus(`${action} ${row.name}…`)
+  setStatus(`${label} ${row.name}${t('ellipsis')}`)
   try {
     const result = await electerm.call('act', row.id, action)
-    setStatus((result && result.message) || `${action} done`, 'ok')
+    setStatus(`${label}${t('done')}`, 'ok')
     await refresh({ quiet: true })
     if (state.logsFor === row.id) {
       await loadLogs(row)
     }
   } catch (error) {
-    setStatus(`${action} failed: ${error.message}`, 'error')
+    setStatus(`${label}${t('failed')}${error.message}`, 'error')
     await refresh({ quiet: true })
   } finally {
     setBusy(row.id, false)
@@ -197,7 +199,7 @@ async function copyExec (row) {
   try {
     const result = await electerm.call('execCommand', row.id)
     await electerm.copy(result.command)
-    setStatus('exec command copied — paste it into a terminal tab', 'ok')
+    setStatus(t('copied'), 'ok')
   } catch (error) {
     setStatus(error.message, 'error')
   }
@@ -210,13 +212,13 @@ async function loadLogs (row) {
     const result = await electerm.call('logs', row.id, 300)
     const body = $('logs-body')
     const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 24
-    body.textContent = result.text || '(no output yet)'
+    body.textContent = result.text || t('noOutput')
     if (atBottom) {
       body.scrollTop = body.scrollHeight
     }
     $('logs-time').textContent = new Date().toLocaleTimeString()
   } catch (error) {
-    $('logs-body').textContent = 'failed to read logs: ' + error.message
+    $('logs-body').textContent = t('readLogsFailed') + error.message
   }
 }
 
@@ -275,6 +277,14 @@ window.addEventListener('beforeunload', () => {
   if (state.refreshTimer) clearInterval(state.refreshTimer)
 })
 
+// The host sends the locale with init; it can send it again if the user
+// changes electerm's language while this panel is open.
+electerm.onLanguageChange = () => {
+  window.widgetI18n.apply()
+  render()
+}
+
 electerm.ready.then(() => {
+  window.widgetI18n.apply()
   refresh()
 })

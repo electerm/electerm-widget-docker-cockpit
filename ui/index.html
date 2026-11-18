@@ -8,12 +8,12 @@
 <body>
   <header class='bar'>
     <div class='brand'>
-      <span id='meta' class='muted'>loading…</span>
+      <span id='meta' class='muted' data-i18n='loading'>loading…</span>
     </div>
     <div class='tools'>
-      <input id='filter' type='search' placeholder='filter' autocomplete='off'>
-      <label class='auto'><input id='auto' type='checkbox'> auto</label>
-      <button id='refresh' class='ghost' title='Refresh now'>refresh</button>
+      <input id='filter' type='search' placeholder='filter' data-i18n='filter' data-i18n-attr='placeholder' autocomplete='off'>
+      <label class='auto'><input id='auto' type='checkbox'> <span data-i18n='auto'>auto</span></label>
+      <button id='refresh' class='ghost' title='Refresh now' data-i18n='refreshNow' data-i18n-attr='title'><span data-i18n='refresh'>refresh</span></button>
     </div>
   </header>
 
@@ -26,7 +26,7 @@
       <span id='logs-title' class='muted elli'></span>
       <span class='grow'></span>
       <span id='logs-time' class='muted'></span>
-      <button id='logs-close' class='ghost' title='Close'>close</button>
+      <button id='logs-close' class='ghost' title='Close' data-i18n='close' data-i18n-attr='title'><span data-i18n='close'>close</span></button>
     </div>
     <pre id='logs-body' class='logs-body'></pre>
   </section>
@@ -35,6 +35,7 @@
     <span id='status' class='muted'></span>
   </footer>
 
+  <script src='i18n.js'></script>
   <script src='app.js'></script>
 </body>
 </html>
