@@ -1,18 +1,27 @@
 {
   "name": "docker-cockpit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "List, start, stop and read logs of local docker containers from electerm",
   "main": "main.js",
   "license": "MIT",
   "author": "ZHAO Xudong",
   "homepage": "https://github.com/electerm/electerm-widget-docker-cockpit",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
   "electerm": {
     "id": "docker-cockpit",
     "name": "Docker Cockpit",
     "description": "Your local containers at a glance: state, ports, logs, start/stop/restart, and a ready-to-paste docker exec command.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "frontend",
-    "ui": "ui/index.html"
+    "ui": "ui/index.html",
+    "i18n": {
+      "zh_cn": {
+        "name": "Docker 控制台",
+        "description": "本地容器一览：状态、端口、日志、启动/停止/重启，以及可直接粘贴的 docker exec 命令。"
+      }
+    }
   }
 }
